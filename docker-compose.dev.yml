@@ -1,0 +1,44 @@
+services:
+  api:
+    build: ./api
+    command: nodemon --legacy-watch ./src/app.js
+    working_dir: /usr/src/app/api
+    volumes:
+      - ./api:/usr/src/app/api
+    ports:
+      - "3001:3001"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      PORT: 3001
+      HOST: 0.0.0.0
+      MONGO_URL: mongodb://api_db:27017/mydatabase
+  api_db:
+    image: mongo:latest
+    volumes:
+      - mongodb_api:/data/db
+  frontend:
+    build:
+      context: ./frontend/frontend
+      dockerfile: Dockerfile.dev
+    command: npm start
+    ports:
+      - "3000:3000"
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend/frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    stdin_open: true
+    tty: true
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf  # Link to dev config
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api
+volumes:
+  mongodb_api:
+    external: false

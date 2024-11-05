@@ -4,6 +4,8 @@ WORKDIR /usr/src/app
 # копіювання package.json та встановлення залежностей
 COPY package*.json ./
 RUN npm install
+RUN npm install cors
+RUN npm install -g nodemon
 # копіюємо вихідний код в робочу папку
 COPY . .
 # повідомляємо Docker, що в контейнері є застосунок, що прослуховує даний порт

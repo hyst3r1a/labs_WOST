@@ -1,0 +1,36 @@
+version: '3'
+services:
+  api:
+    build: ./api
+    command: npm start
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      HOST: 0.0.0.0
+      MONGO_URL: mongodb://api_db:27017/mydatabase
+  api_db:
+    image: mongo:latest
+    volumes:
+      - mongodb_api:/data/db
+  frontend:
+    build:
+      context: ./frontend/frontend
+      dockerfile: Dockerfile.prod
+    command: ["serve", "-s", "build", "-l", "3000"]
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf  # Link to prod config
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api
+volumes:
+  mongodb_api:
+    external: false
